@@ -129,7 +129,7 @@ public class Register extends JFrame {
 		regBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MongoClient mongoClient = new MongoClient("localhost",27017);
-				MongoDatabase db = mongoClient.getDatabase("BankUsersDB");
+				MongoDatabase db = mongoClient.getDatabase("ExamsDB");
 				MongoCollection<Document> collection=db.getCollection("userLogin");
 				String u=userName.getText();
 				String p=password.getText();
@@ -138,8 +138,18 @@ public class Register extends JFrame {
 				String c=citySelect.getSelectedItem().toString();
 				;
 				Document d=collection.find(eq("username",u)).first();
+				Document pn=collection.find(eq("mobile",m)).first();
 				if (d!=null) {
 					JOptionPane.showMessageDialog(new JFrame(), "User exists","Select different username",JOptionPane.ERROR_MESSAGE);
+				}
+				else if(p.length()<8) {
+					JOptionPane.showMessageDialog(new JFrame(), "password should be atleast 8 characters","",JOptionPane.ERROR_MESSAGE);
+				}
+				else if(m.length()!=10) {
+					JOptionPane.showMessageDialog(new JFrame(), "Invalid phone number","",JOptionPane.ERROR_MESSAGE);
+				}
+				else if(pn!=null) {
+					JOptionPane.showMessageDialog(new JFrame(), "Phone number already in use","",JOptionPane.ERROR_MESSAGE);
 				}
 				else {
 					Document doc =new Document("username",u);
@@ -147,12 +157,11 @@ public class Register extends JFrame {
 					doc.append("password",p);  
 					doc.append("mobile",m);  
 					doc.append("city",c);
-					doc.append("balance",500.0);
 					collection.insertOne(doc);
 					JOptionPane.showMessageDialog(new JFrame(), "Success","Registration Successful",JOptionPane.OK_OPTION);
 					Document req=collection.find(eq("username",u)).first();
-					//Welcome frame = new Welcome(req);
-					//frame.setVisible(true);
+					Welcome frame = new Welcome(u);
+					frame.setVisible(true);
 					dispose();
 					mongoClient.close();
 					
